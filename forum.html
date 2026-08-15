@@ -432,7 +432,7 @@
                     <label class="block text-xs font-bold text-slate-700 mb-1">現時身份 / 狀態</label>
                     <select id="regRole" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500">
                         <option value="學生會員">📚 在校學生</option>
-                        <option value="生涯導師">🏆 教育工作者/CCSP 認可導師</option>
+                        <option value="導師會員">🏆 教育工作者/導師</option>
                         <option value="受僱人士">💼 受僱人士</option>
                         <option value="創業者">💰 自僱人士/創業者</option>
                         <option value="待業中">👀 待業/失業/失學人士</option>
@@ -566,7 +566,7 @@
                     <label class="block text-[11px] font-semibold text-slate-600 mb-1">現時狀態</label>
                     <select id="editRoleSelect" class="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500">
                         <option value="學生會員">📚 在校學生</option>
-                        <option value="生涯導師">🏆 教育工作者/CCSP 認可導師</option>
+                        <option value="導師會員">🏆 教育工作者/導師</option>
                         <option value="受僱人士">💼 受僱人士</option>
                         <option value="創業者">💰 自僱人士/創業者</option>
                         <option value="待業中">👀 待業/失業/失學人士</option>
@@ -816,8 +816,11 @@
             <div class="space-y-4 text-sm text-slate-700">
                 <p class="font-bold text-brand-700 text-base">「生涯規劃」在學校就聽得多，但專業的服務卻未試過？</p>
                 <p class="text-xs text-slate-600 leading-relaxed">
-                選用Shall We Go的專業生涯諮詢服務，在每次60分鐘的諮詢環節，會由專業且經驗豐富的生涯規劃發展師陪你一齊探索人生的方向及理想。最重要的是，我們會確切陪你實現目標，不再紙上談兵。                    
-                </p>
+                選用Shall We Go的專業生涯諮詢服務，在每次60分鐘的諮詢環節，會由專業且經驗豐富的生涯規劃發展師陪你一齊探索人生的方向及理想。最重要的是，我們會確切陪你實現目標，不再紙上談兵。時不宜遲，立即聯絡我們查詢詳情。
+                    <div>
+                        <p class="font-bold text-slate-800">WhatsApp 專線</p>
+                        <a href="https://wa.me/85296064537" target="_blank" class="text-emerald-600 hover:underline">+852 96064537</a>
+                    </div>
 
                 <div class="space-y-3 pt-2">
                     <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start space-x-3">
@@ -831,8 +834,8 @@
                     <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start space-x-3">
                         <div class="w-8 h-8 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center flex-shrink-0 font-bold">2</div>
                         <div>
-                            <h5 class="font-bold text-slate-800">同路人的社群支援功能</h5>
-                            <p class="text-xs text-slate-500 mt-0.5">在線上討論區分享心得、交流經驗，彼此扶持成長。</p>
+                            <h5 class="font-bold text-slate-800">VIP社群支援功能</h5>
+                            <p class="text-xs text-slate-500 mt-0.5">開啓VIP專屬的討論分區，隨時獲得CCSP認可導師的親自解答。</p>
                         </div>
                     </div>
 
@@ -1479,7 +1482,7 @@
                 comments: [
                     {
                         author: 'Chris 導師',
-                        authorRole: '生涯導師',
+                        authorRole: '導師會員',
                         authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
                         content: 'SiuMing你好！性格測試只係幫助你了解偏好既工具，唔代表限制。在 Shall We Go 既敏捷生涯框架中，我哋建議你先嘗試小步驟「實驗」（例如參加相關工作坊或訪問同行），比單純在腦海中比較更能找到答案！',
                         time: '10分鐘前'
@@ -1495,7 +1498,7 @@
                 content: '大家都聽過 Agile Management 係軟件開發用，但原來自律同職涯規劃都可以用敏捷思維！將一年既宏大目標拆解成 2 星期一個 Sprint，即使中間計劃有變，都可以快速 Pivot 調整策略。大家最近有冇定下甚麼 Sprint 目標？',
                 author: 'Chris 導師',
                 authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-                authorRole: '生涯導師',
+                authorRole: '導師會員',
                 imageUrl: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80',
                 tags: ['AgileManagement', '敏捷思維', '生涯規劃'],
                 likes: 28,
@@ -1644,7 +1647,7 @@
                     username: 'Chris （導師）',
                     email: 'chris@shallwego.hk',
                     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-                    role: '生涯導師',
+                    role: '導師會員',
                     isAdmin: false,
                     isRestricted: false,
                     isVip: true,

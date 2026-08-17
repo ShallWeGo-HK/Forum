@@ -980,7 +980,7 @@
 
     <script>
         // 全站預設 Gemini API Key
-        const DEFAULT_GEMINI_API_KEY = "AQ.Ab8RN6IyBoLQybJaC0zMd-L67e_nSwBxidbzXJid-iPrII0CfA"; 
+        const DEFAULT_GEMINI_API_KEY = "AQ.Ab8RN6J-aUheehvn2TQDzr9popGzYRKNNgYspCbTxauXFRUncQ"; 
 
         // Utility: HTML Escaping Helper
         function escapeHtml(str) {
@@ -1113,11 +1113,7 @@
         }
 
         function getGeminiTextUrl() {
-            return `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash-preview:generateContent?key=${getActiveApiKey()}`;
-        }
-
-        function getGeminiTtsUrl() {
-            return `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-preview-tts:generateContent?key=${getActiveApiKey()}`;
+            return `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${getActiveApiKey()}`;
         }
 
         function saveCustomApiKey(event) {

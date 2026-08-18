@@ -65,7 +65,7 @@
         <div class="max-w-10xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <!-- Logo & Brand Title -->
-                 <div class="flex items-center space-x-3 cursor-pointer" onclick="switchCategory('all')">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchCategory('all')">
                     <div class="w-20 h-20">
                         <img src="Number 1.png" alt="Image description" width="1200" height="1000">
                     </div>
@@ -1007,7 +1007,6 @@
             {
                 username: 'Shall We Go 站長',
                 email: 'shallwego.org@gmail.com',
-                password: '123',
                 avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
                 role: '站長/管理員',
                 isAdmin: true,
@@ -1114,23 +1113,60 @@
         }
 
         // Handle Account Login
-        function handleAccountLogin(event) {
+        async function handleAccountLogin(event) {
             event.preventDefault();
             const identifier = document.getElementById('loginIdentifier').value.trim();
             const password = document.getElementById('loginPassword').value;
 
+            // 1. 優先嘗試 Firebase 雲端驗證
+            if (typeof window.firebaseLogin === 'function') {
+                try {
+                    const userData = await window.firebaseLogin(identifier, password);
+                    
+                    if (userData) {
+                        const isAdminAccount = userData.email?.toLowerCase() === 'shallwego.org@gmail.com';
+                        
+                        currentUser = {
+                            username: userData.username || (isAdminAccount ? 'Shall We Go 站長' : '會員'),
+                            email: userData.email,
+                            avatar: userData.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+                            role: isAdminAccount ? '站長/管理員' : (userData.role || '學生會員'),
+                            isAdmin: isAdminAccount,
+                            isRestricted: !!userData.isRestricted,
+                            isVip: isAdminAccount ? true : !!userData.isVip,
+                            isGuest: false
+                        };
+
+                        localStorage.setItem('swg_user', JSON.stringify(currentUser));
+                        renderUserArea();
+                        renderCategoryNav();
+                        renderPosts();
+                        closeModal('authModal');
+                        showToast(`歡迎回來，${currentUser.username}！`, 'success');
+                        return;
+                    }
+                } catch (err) {
+                    console.warn("Firebase 登入失敗:", err);
+                    if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
+                        showToast('帳號/電郵或密碼不正確，請重新確認！', 'error');
+                        return;
+                    }
+                }
+            }
+
+            // 2. 本地備份比對（僅供 Quick Demo 用戶）
             const user = registeredUsers.find(u => 
-                (u.email.toLowerCase() === identifier.toLowerCase() || u.username.toLowerCase() === identifier.toLowerCase()) && 
-                u.password === password
+                (u.email && u.email.toLowerCase() === identifier.toLowerCase()) || 
+                (u.username && u.username.toLowerCase() === identifier.toLowerCase())
             );
 
-            if (user) {
+            if (user && user.password && user.password === password) {
                 currentUser = {
                     username: user.username,
                     email: user.email,
                     avatar: user.avatar,
                     role: user.role,
-                    isAdmin: !!user.isAdmin || user.role === '站長/管理員',
+                    isAdmin: !!user.isAdmin || user.email?.toLowerCase() === 'shallwego.org@gmail.com',
                     isRestricted: !!user.isRestricted,
                     isVip: !!user.isVip,
                     isGuest: false
@@ -1146,8 +1182,8 @@
             }
         }
 
-        // Handle Account Register
-        function handleAccountRegister(event) {
+        // 修改後的註冊處理
+        async function handleAccountRegister(event) {
             event.preventDefault();
             const username = document.getElementById('regUsername').value.trim();
             const email = document.getElementById('regEmail').value.trim();
@@ -1160,31 +1196,36 @@
                 return;
             }
 
-            if (registeredUsers.some(u => u.email.toLowerCase() === email.toLowerCase() || u.username.toLowerCase() === username.toLowerCase())) {
-                showToast('此電郵或暱稱已被註冊，請選用其他暱稱或直接登入！', 'error');
-                return;
-            }
-
             const avatar = currentAvatarDataUrl || document.getElementById('authAvatarUrlInput')?.value.trim() || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80';
+
+            if (typeof window.firebaseRegister === 'function') {
+                try {
+                    const userData = await window.firebaseRegister(email, password, username, avatar, role);
+                    currentUser = { ...userData, isAdmin: false, isGuest: false };
+                    localStorage.setItem('swg_user', JSON.stringify(currentUser));
+                    renderUserArea();
+                    renderCategoryNav();
+                    renderPosts();
+                    closeModal('authModal');
+                    showToast(`帳號註冊成功並已同步至雲端！`, 'success');
+                    return;
+                } catch (err) {
+                    showToast(`註冊失敗: ${err.message}`, 'error');
+                    return;
+                }
+            }
 
             const newUser = { username, email, password, avatar, role, isAdmin: false, isRestricted: false, isVip: false };
             registeredUsers.push(newUser);
             saveRegisteredUsers();
-
-            currentUser = { username, email, avatar, role, isAdmin: false, isRestricted: false, isVip: false, isGuest: false };
+            currentUser = { ...newUser, isGuest: false };
             localStorage.setItem('swg_user', JSON.stringify(currentUser));
-
-            const regForm = document.getElementById('registerForm');
-            if (regForm) regForm.reset();
-            currentAvatarDataUrl = '';
-            const preview = document.getElementById('authAvatarPreview');
-            if (preview) preview.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80';
 
             renderUserArea();
             renderCategoryNav();
             renderPosts();
             closeModal('authModal');
-            showToast(`帳號註冊成功！歡迎加入 Shall We Go，${username}！`, 'success');
+            showToast(`帳號註冊成功（本地模式）！`, 'success');
         }
 
         // Demo Logins
@@ -1647,7 +1688,7 @@
             postCountBadge.innerText = `共 ${filtered.length} 則討論`;
 
             if (filtered.length === 0) {
-                postsContainer.innerHTML = `
+                container.innerHTML = `
                     <div class="bg-white rounded-2xl p-8 text-center border border-slate-200 text-slate-400 space-y-3">
                         <i class="fa-solid fa-magnifying-glass-minus text-4xl text-slate-300"></i>
                         <p class="text-sm font-medium text-slate-600">${searchQuery ? `找不到與「${escapeHtml(searchQuery)}」相關的帖文` : '暫時未有相關主題帖文'}</p>
@@ -1669,9 +1710,6 @@
                 const isLikedByMe = post.likedBy && currentUser && post.likedBy.includes(currentUser.username);
                 const authorUser = registeredUsers.find(u => u.username === post.author);
                 const isAuthorVip = post.authorIsVip || (authorUser && authorUser.isVip);
-            
-
-                
 
                 return `
                 <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition space-y-3">
@@ -1986,6 +2024,10 @@
                 target.isVip = !target.isVip;
                 saveRegisteredUsers();
 
+                if (target.uid && typeof window.updateUserPermissionInFirestore === 'function') {
+                    window.updateUserPermissionInFirestore(target.uid, { isVip: target.isVip });
+                }
+
                 if (currentUser && currentUser.email === target.email) {
                     currentUser.isVip = target.isVip;
                     localStorage.setItem('swg_user', JSON.stringify(currentUser));
@@ -2004,6 +2046,10 @@
             if (target) {
                 target.isRestricted = !target.isRestricted;
                 saveRegisteredUsers();
+
+                if (target.uid && typeof window.updateUserPermissionInFirestore === 'function') {
+                    window.updateUserPermissionInFirestore(target.uid, { isRestricted: target.isRestricted });
+                }
 
                 if (currentUser && currentUser.email === target.email) {
                     currentUser.isRestricted = target.isRestricted;
@@ -2191,106 +2237,180 @@
         });
     </script>
 
-    <!-- ===== FIREBASE SCRIPT INTEGRATION ===== -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+<!-- ===== FIREBASE SCRIPT INTEGRATION (ADMIN SYNC & RENDER FIX) ===== -->
+<script type="module">
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { 
+        getAuth, 
+        signInWithEmailAndPassword, 
+        createUserWithEmailAndPassword,
+        updateProfile 
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        setDoc, 
+        getDoc, 
+        getDocs,
+        deleteDoc, 
+        collection, 
+        onSnapshot 
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'shall-we-go-forum';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-          apiKey: "AIzaSyBm2mePZ2zxCzXqJyZyaYLv9fpEQpSdl08",
-          authDomain: "shall-we-go-forum.firebaseapp.com",
-          projectId: "shall-we-go-forum",
-          storageBucket: "shall-we-go-forum.firebasestorage.app",
-          messagingSenderId: "757450381445",
-          appId: "1:757450381445:web:392eee0878d498ab9331ec",
-          measurementId: "G-85WNETZ4V0"
+    const firebaseConfig = {
+        apiKey: "AIzaSyBm2mePZ2zxCzXqJyZyaYLv9fpEQpSdl08",
+        authDomain: "shall-we-go-forum.firebaseapp.com",
+        projectId: "shall-we-go-forum",
+        storageBucket: "shall-we-go-forum.firebasestorage.app",
+        messagingSenderId: "757450381445",
+        appId: "1:757450381445:web:392eee0878d498ab9331ec"
+    };
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // 登入功能
+    window.firebaseLogin = async function(email, password) {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        let userData = {
+            uid: user.uid,
+            username: user.displayName || email.split('@')[0],
+            email: user.email,
+            avatar: user.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+            role: user.email.toLowerCase() === 'shallwego.org@gmail.com' ? '站長/管理員' : '學生會員',
+            isAdmin: user.email.toLowerCase() === 'shallwego.org@gmail.com',
+            isVip: user.email.toLowerCase() === 'shallwego.org@gmail.com',
+            isRestricted: false
         };
 
-        async function startFirebase() {
-            const badge = document.getElementById('cloudStatusBadge');
-
-            if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("YOUR_FIREBASE_API_KEY")) {
-                console.warn("⚠️ Firebase API Key 尚未設定。系統自動切換至 LocalStorage 本地模式。");
-                if (badge) {
-                    badge.className = "hidden sm:flex items-center space-x-1 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs border border-amber-200";
-                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span><span class="font-medium">本地模式</span>`;
-                    badge.classList.remove('hidden');
-                }
-                return;
-            }
-
-            try {
-                const app = initializeApp(firebaseConfig);
-                const db = getFirestore(app);
-                const auth = getAuth(app);
-
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                if (badge) {
-                    badge.className = "hidden sm:flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs border border-emerald-200";
-                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span class="font-medium">雲端連線</span>`;
-                    badge.classList.remove('hidden');
-                }
-
-                const postsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
-
-                onSnapshot(postsCollection, (snapshot) => {
-                    const cloudPosts = [];
-                    snapshot.forEach((docSnap) => {
-                        cloudPosts.push({ id: docSnap.id, ...docSnap.data() });
-                    });
-
-                    if (cloudPosts.length > 0) {
-                        window.posts = cloudPosts;
-                        if (typeof window.savePosts === 'function') window.savePosts();
-                        if (typeof window.renderCategoryNav === 'function') window.renderCategoryNav();
-                        if (typeof window.renderPosts === 'function') window.renderPosts();
-                    } else if (window.posts && window.posts.length > 0) {
-                        window.posts.forEach(p => window.savePostToFirestore(p));
-                    }
-                }, (error) => {
-                    console.error("Firestore onSnapshot error:", error);
-                });
-
-                window.savePostToFirestore = async function(postData) {
-                    try {
-                        const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', postData.id);
-                        await setDoc(postRef, postData);
-                    } catch (err) {
-                        console.error("Firestore setDoc error:", err);
-                    }
-                };
-
-                window.updatePostInFirestore = async function(postId, updateFields) {
-                    try {
-                        const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId);
-                        await setDoc(postRef, updateFields, { merge: true });
-                    } catch (err) {
-                        console.error("Firestore updateDoc error:", err);
-                    }
-                };
-
-                window.deletePostFromFirestore = async function(postId) {
-                    try {
-                        const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId);
-                        await deleteDoc(postRef);
-                    } catch (err) {
-                        console.error("Firestore deleteDoc error:", err);
-                    }
-                };
-            } catch (err) {
-                console.warn("Firebase 初始化失敗:", err.message);
-            }
+        try {
+            const userDocRef = doc(db, 'users', user.uid);
+            await setDoc(userDocRef, userData, { merge: true });
+        } catch (err) {
+            console.error("Firestore 登入同步失敗:", err);
         }
 
-        startFirebase();
-    </script>
+        return userData;
+    };
+
+    // 註冊功能
+    window.firebaseRegister = async function(email, password, username, avatar, role) {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        await updateProfile(user, { displayName: username, photoURL: avatar });
+
+        const userData = {
+            uid: user.uid,
+            username: username,
+            email: email,
+            avatar: avatar,
+            role: role || '學生會員',
+            isAdmin: email.toLowerCase() === 'shallwego.org@gmail.com',
+            isVip: email.toLowerCase() === 'shallwego.org@gmail.com',
+            isRestricted: false,
+            createdAt: Date.now()
+        };
+
+        try {
+            await setDoc(doc(db, 'users', user.uid), userData);
+        } catch (dbErr) {
+            console.error("Firestore 註冊寫入失敗:", dbErr);
+        }
+
+        return userData;
+    };
+
+    // 站長切換 VIP / 禁言權限
+    window.updateUserPermissionInFirestore = async function(uid, updateFields) {
+        try {
+            await setDoc(doc(db, 'users', uid), updateFields, { merge: true });
+        } catch (err) {
+            console.error("更新權限失敗:", err);
+        }
+    };
+
+    // 強制手動加載全站會員（解決 Modal 打開時資料沒繪製問題）
+    window.fetchUsersDirectly = async function() {
+        try {
+            const querySnapshot = await getDocs(collection(db, 'users'));
+            const cloudUsers = [];
+            querySnapshot.forEach((docSnap) => {
+                cloudUsers.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            if (cloudUsers.length > 0) {
+                window.registeredUsers = cloudUsers;
+                localStorage.setItem('swg_registered_users', JSON.stringify(cloudUsers));
+                if (typeof window.renderAdminUsersList === 'function') {
+                    window.renderAdminUsersList();
+                }
+            }
+        } catch (err) {
+            console.error("手動獲取會員失敗:", err);
+        }
+    };
+
+    async function startFirebase() {
+        const badge = document.getElementById('cloudStatusBadge');
+        if (badge) {
+            badge.className = "hidden sm:flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs border border-emerald-200";
+            badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span class="font-medium">雲端連線</span>`;
+            badge.classList.remove('hidden');
+        }
+
+        // 1. 實時監聽 Users 集合
+        onSnapshot(collection(db, 'users'), (snapshot) => {
+            const cloudUsers = [];
+            snapshot.forEach((docSnap) => {
+                cloudUsers.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            
+            if (cloudUsers.length > 0) {
+                window.registeredUsers = cloudUsers;
+                localStorage.setItem('swg_registered_users', JSON.stringify(cloudUsers));
+                // 如果控制台 Modal 目前是打開狀態，立即重繪列表
+                const adminModal = document.getElementById('adminPanelModal');
+                if (adminModal && !adminModal.classList.contains('hidden') && typeof window.renderAdminUsersList === 'function') {
+                    window.renderAdminUsersList();
+                }
+            }
+        }, (err) => {
+            console.error("監聽用戶失敗:", err);
+        });
+
+        // 2. 實時監聽 Posts 帖文
+        onSnapshot(collection(db, 'posts'), (snapshot) => {
+            const cloudPosts = [];
+            snapshot.forEach((docSnap) => {
+                cloudPosts.push({ id: docSnap.id, ...docSnap.data() });
+            });
+
+            if (cloudPosts.length > 0) {
+                window.posts = cloudPosts;
+                if (typeof window.savePosts === 'function') window.savePosts();
+                if (typeof window.renderCategoryNav === 'function') window.renderCategoryNav();
+                if (typeof window.renderPosts === 'function') window.renderPosts();
+            }
+        });
+
+        window.savePostToFirestore = async function(postData) {
+            try { await setDoc(doc(db, 'posts', postData.id), postData); } catch (err) { console.error(err); }
+        };
+
+        window.updatePostInFirestore = async function(postId, updateFields) {
+            try { await setDoc(doc(db, 'posts', postId), updateFields, { merge: true }); } catch (err) { console.error(err); }
+        };
+
+        window.deletePostFromFirestore = async function(postId) {
+            try { await deleteDoc(doc(db, 'posts', postId)); } catch (err) { console.error(err); }
+        };
+    }
+
+    startFirebase();
+</script>
 
 <footer class="text-xs text-slate-500 text-center py-4 border-t border-slate-200 leading-relaxed bg-white mt-8">Copyright © 2025-2026 Shall We Go & Even Tse All Rights Reserved.     
     <a href="https://drive.google.com/file/d/1F4cu1hRekgkFPlVw9qJNg9Pk7OrooaZp/view?usp=drive_link">User Agreement</a> & <a href="https://drive.google.com/file/d/152-JHs2Te3jdJmd8J7ppjtlhAj--5_8I/view?usp=drive_link">Privacy Policy</a>

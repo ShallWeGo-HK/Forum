@@ -106,7 +106,7 @@
                     </button>
 
                     <!-- Create Post Button -->
-                    <button onclick="checkAuthAndOpen('createPostModal')" class="bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold px-3.5 py-1.5 rounded-full shadow-sm hover:shadow flex items-center space-x-1.5 transition">
+                   <button onclick="checkAuthAndOpen('createPostModal')" class="bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold px-2.5 sm:px-3.5 py-1.5 rounded-full shadow-sm hover:shadow flex items-center space-x-1 transition whitespace-nowrap">
                         <i class="fa-solid fa-pen-to-square"></i>
                         <span>開帖文</span>
                     </button>
@@ -1451,11 +1451,11 @@
                 `;
             } else {
                 userArea.innerHTML = `
-                    <button onclick="openModal('authModal')" class="bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-bold px-3 py-1.5 rounded-full transition flex items-center space-x-1">
-                        <i class="fa-solid fa-right-to-bracket"></i>
-                        <span>登入/註冊</span>
-                    </button>
-                `;
+    <button onclick="openModal('authModal')" class="bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-[11px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded-full transition flex items-center space-x-1 whitespace-nowrap">
+        <i class="fa-solid fa-right-to-bracket"></i>
+        <span>登入/註冊</span>
+    </button>
+`;
                 rightUserProfile.innerHTML = `
                     <div class="text-center space-y-3 py-2">
                         <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 text-xl">

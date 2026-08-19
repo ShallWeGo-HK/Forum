@@ -446,10 +446,6 @@
                         <div class="font-bold text-slate-800 text-xs">💼 職場過來人</div>
                         <div class="text-[10px] text-slate-500 mt-0.5">Mary (人力資源經理)</div>
                     </button>
-                    <button type="button" onclick="loginAsDemo('mentor')" class="bg-white border border-slate-200 hover:border-brand-500 hover:bg-brand-50 p-2.5 rounded-xl text-left transition shadow-sm col-span-2">
-                        <div class="font-bold text-slate-800 text-xs">🏆 認可資深導師</div>
-                        <div class="text-[10px] text-slate-500 mt-0.5">Chris (CCSP / GCDF 職涯顧問 - VIP 權限)</div>
-                    </button>
                 </div>
             </div>
         </div>
@@ -1245,17 +1241,6 @@
                     isAdmin: false,
                     isRestricted: false,
                     isVip: false,
-                    isGuest: false
-                };
-            } else if (type === 'mentor') {
-                currentUser = {
-                    username: 'Chris (CCSP / GCDF 導師)',
-                    email: 'chris@shallwego.hk',
-                    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-                    role: '導師會員',
-                    isAdmin: false,
-                    isRestricted: false,
-                    isVip: true,
                     isGuest: false
                 };
             }

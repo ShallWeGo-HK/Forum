@@ -1595,6 +1595,19 @@ async function handleAccountRegister(event) {
 
         function setFilter(filterType) {
             currentFilter = filterType;
+            ['btnFilterLatest', 'btnFilterPopular', 'btnFilterUnanswered'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.classList.remove('bg-brand-50', 'text-brand-700', 'font-semibold');
+                    btn.classList.add('hover:bg-slate-100');
+                }
+            });
+
+            const activeBtn = document.getElementById('btnFilter' + filterType.charAt(0).toUpperCase() + filterType.slice(1));
+            if (activeBtn) {
+                activeBtn.classList.add('bg-brand-50', 'text-brand-700', 'font-semibold');
+                activeBtn.classList.remove('hover:bg-slate-100');
+            }
             renderPosts();
         }
 

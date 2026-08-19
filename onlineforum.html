@@ -340,9 +340,6 @@
                 <button type="button" onclick="switchAuthTab('register')" id="authTabRegister" class="flex-1 py-2 rounded-lg hover:text-slate-900 transition">
                     📝 免費註冊
                 </button>
-                <button type="button" onclick="switchAuthTab('demo')" id="authTabDemo" class="flex-1 py-2 rounded-lg hover:text-slate-900 transition">
-                    ⚡ 快速體驗
-                </button>
             </div>
 
             <!-- TAB 1: LOGIN FORM -->
@@ -430,24 +427,6 @@
                     建立新帳號並登入
                 </button>
             </form>
-
-            <!-- TAB 3: FAST DEMO LOGINS -->
-            <div id="demoLoginForm" class="hidden space-y-3">
-                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900">
-                    <p class="font-bold mb-1">💡 快速體驗（選擇身份一鍵登入）：</p>
-                    <p class="text-[11px] text-amber-800">免去註冊手續，適合即時測試發帖、讚好與智能助教解惑功能。</p>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="button" onclick="loginAsDemo('student')" class="bg-white border border-slate-200 hover:border-brand-500 hover:bg-brand-50 p-2.5 rounded-xl text-left transition shadow-sm">
-                        <div class="font-bold text-slate-800 text-xs">🎓 迷途小書童</div>
-                        <div class="text-[10px] text-slate-500 mt-0.5">Peter (學生)</div>
-                    </button>
-                    <button type="button" onclick="loginAsDemo('worker')" class="bg-white border border-slate-200 hover:border-brand-500 hover:bg-brand-50 p-2.5 rounded-xl text-left transition shadow-sm">
-                        <div class="font-bold text-slate-800 text-xs">💼 職場過來人</div>
-                        <div class="text-[10px] text-slate-500 mt-0.5">Mary (人力資源經理)</div>
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1092,32 +1071,23 @@
         function switchAuthTab(tab) {
             const loginForm = document.getElementById('loginForm');
             const regForm = document.getElementById('registerForm');
-            const demoForm = document.getElementById('demoLoginForm');
             const btnLogin = document.getElementById('authTabLogin');
             const btnReg = document.getElementById('authTabRegister');
-            const btnDemo = document.getElementById('authTabDemo');
 
-            if (!loginForm || !regForm || !demoForm) return;
+            if (!loginForm || !regForm) return;
 
-            [btnLogin, btnReg, btnDemo].forEach(b => {
+            [btnLogin, btnReg].forEach(b => {
                 if (b) b.classList.remove('bg-white', 'shadow-sm', 'text-brand-700');
             });
 
             if (tab === 'login') {
                 loginForm.classList.remove('hidden');
                 regForm.classList.add('hidden');
-                demoForm.classList.add('hidden');
                 if (btnLogin) btnLogin.classList.add('bg-white', 'shadow-sm', 'text-brand-700');
             } else if (tab === 'register') {
                 loginForm.classList.add('hidden');
                 regForm.classList.remove('hidden');
-                demoForm.classList.add('hidden');
                 if (btnReg) btnReg.classList.add('bg-white', 'shadow-sm', 'text-brand-700');
-            } else if (tab === 'demo') {
-                loginForm.classList.add('hidden');
-                regForm.classList.add('hidden');
-                demoForm.classList.remove('hidden');
-                if (btnDemo) btnDemo.classList.add('bg-white', 'shadow-sm', 'text-brand-700');
             }
         }
 
@@ -1165,7 +1135,7 @@ if (userData) {
                 }
             }
 
-            // 2. 本地備份比對（僅供 Quick Demo 用戶）
+            // 2. 本地備份比對
             const user = registeredUsers.find(u => 
                 (u.email && u.email.toLowerCase() === identifier.toLowerCase()) || 
                 (u.username && u.username.toLowerCase() === identifier.toLowerCase())
@@ -1280,40 +1250,6 @@ async function handleAccountRegister(event) {
     closeModal('authModal');
     showToast(`帳號註冊成功（離線模式）！`, 'success');
 }
-
-        // Demo Logins
-        function loginAsDemo(type) {
-            if (type === 'student') {
-                currentUser = {
-                    username: 'Peter (學生)',
-                    email: 'peter@example.com',
-                    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-                    role: '學生會員',
-                    isAdmin: false,
-                    isRestricted: false,
-                    isVip: false,
-                    isGuest: false
-                };
-            } else if (type === 'worker') {
-                currentUser = {
-                    username: 'Mary (人力資源經理)',
-                    email: 'mary@example.com',
-                    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
-                    role: '受僱人士',
-                    isAdmin: false,
-                    isRestricted: false,
-                    isVip: false,
-                    isGuest: false
-                };
-            }
-
-            localStorage.setItem('swg_user', JSON.stringify(currentUser));
-            renderUserArea();
-            renderCategoryNav();
-            renderPosts();
-            closeModal('authModal');
-            showToast(`已登入為「${currentUser.username}」！`, 'success');
-        }
 
         // Avatar Upload Helpers
         let currentAvatarDataUrl = '';
@@ -2197,7 +2133,7 @@ async function handleAccountRegister(event) {
             let step2 = `2. 【資訊調研】：本週聯絡 1-2 位該領域過來人進行短暫訪談。`;
             let step3 = `3. 【微實驗】：完成一個小型練習專案驗證興趣與能力。`;
 
-            const aiText = `✨ Shall We Go CCSP / GCDF 導師分析：\n\n💙【同理與肯定】\n你好 ${post.author}！非常理解你在【${post.category}】遇到的挑戰。感到迷惘是改變階段十分正常的現象！\n\n🎯【建議 3 步小實驗】\n${step1}\n${step2}\n${step3}\n\n記得：「小步快跑，隨時 Pivot」！`;
+            const aiText = `✨ Shall We Go CCSP / GCDF 導師分析：\n\n💙【同理與肯定】\n你好 ${post.author}！非常理解你在【${post.category}】遇到的挑戰。感到迷惘是改變階段靜態正常的現象！\n\n🎯【建議 3 步小實驗】\n${step1}\n${step2}\n${step3}\n\n記得：「小步快跑，隨時 Pivot」！`;
 
             const newComment = {
                 author: 'Shall We Go 智能助教',

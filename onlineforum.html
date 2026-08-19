@@ -1039,8 +1039,8 @@
                 timestamp: Date.now() - 3600000
             }
         ];
-
-        let posts = JSON.parse(localStorage.getItem('swg_posts')) || defaultPosts;
+// 為了相容原本函數內的 posts 引用，建立 getter/setter 或統一使用 window.posts
+        window.posts = JSON.parse(localStorage.getItem('swg_posts')) || defaultPosts;
 
         let currentCategory = 'all';
         let currentFilter = 'latest';
@@ -2363,18 +2363,31 @@
 
         // 2. 實時監聽 Posts 帖文
         onSnapshot(collection(db, 'posts'), (snapshot) => {
-            const cloudPosts = [];
-            snapshot.forEach((docSnap) => {
-                cloudPosts.push({ id: docSnap.id, ...docSnap.data() });
-            });
+    const cloudPosts = [];
+    snapshot.forEach((docSnap) => {
+        // 確保每個 Doc 的 ID 正確寫入
+        cloudPosts.push({ id: docSnap.id, ...docSnap.data() });
+    });
 
-            if (cloudPosts.length > 0) {
-                window.posts = cloudPosts;
-                if (typeof window.savePosts === 'function') window.savePosts();
-                if (typeof window.renderCategoryNav === 'function') window.renderCategoryNav();
-                if (typeof window.renderPosts === 'function') window.renderPosts();
-            }
-        });
+    console.log("Firestore 最新帖文列表：", cloudPosts); // 可在 console 檢查
+
+    if (cloudPosts.length > 0) {
+        // 強制同步至全域變數與主腳本變數
+        window.posts = cloudPosts;
+        if (typeof posts !== 'undefined') {
+            posts = cloudPosts;
+        }
+        
+        // 寫入本地快取
+        localStorage.setItem('swg_posts', JSON.stringify(cloudPosts));
+
+        // 重新繪製介面
+        if (typeof renderCategoryNav === 'function') renderCategoryNav();
+        if (typeof renderPosts === 'function') renderPosts();
+    }
+}, (error) => {
+    console.error("Firestore 帖文監聽失敗：", error);
+});
 
         window.savePostToFirestore = async function(postData) {
             try { await setDoc(doc(db, 'posts', postData.id), postData); } catch (err) { console.error(err); }

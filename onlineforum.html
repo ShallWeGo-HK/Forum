@@ -156,8 +156,8 @@
         <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#14b8a6_1px,transparent_1px)] [background-size:16px_16px]"></div>
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
             <div class="max-w-2xl text-center md:text-left">
-                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">✨ 想贏在後天的起跑線嗎？</h2>
-                <p class="text-slate-300 text-sm sm:text-base mt-2">之前落後於人，仍可逆轉翻身！不妨找Shall We Go的專業導師與同路人陪你逆襲人生。</p>
+                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">✨ 全港首個專注於生涯規劃的討論區</h2>
+                <p class="text-slate-300 text-sm sm:text-base mt-2">想贏在後天的起跑線？不妨找Shall We Go的專業導師與同路人陪你逆襲人生。</p>
                 <div class="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
                     <button onclick="switchCategory('升學發展')" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-md border border-white/10 transition">🎓 #升學選科</button>
                     <button onclick="switchCategory('職場增值')" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-md border border-white/10 transition">💼 #職涯轉型</button>
@@ -202,7 +202,7 @@
                     </div>
                     <p class="text-xs text-slate-600 leading-relaxed">
                         「人生來之不易，但放棄太過容易。與其獨自苦惱，不如由我們陪你尋找出路」<br><br>
-                        在這裡，我們提倡互相尊重、理性討論。不論你的升學、職涯、終生大事決定如何，我們都會陪你一步步實現目標！
+                        在這裡，我們不只討論，更陪你走。不論你的升學、職涯、終生大事決定如何，我們都會陪你一步步實現目標！
                     </p>
                     <div class="mt-4 pt-3 border-t border-teal-200/60 flex items-center justify-between text-xs text-brand-800 font-medium">
                         <span>Shall We Go 討論區守則</span>
@@ -382,11 +382,11 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">密碼</label>
-                        <input type="password" id="regPassword" required minlength="4" placeholder="至少4個字元" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <input type="password" id="regPassword" required minlength="6" placeholder="至少6個字元" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">確認密碼</label>
-                        <input type="password" id="regPasswordConfirm" required minlength="4" placeholder="再次輸入密碼" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <input type="password" id="regPasswordConfirm" required minlength="6" placeholder="再次輸入密碼" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500">
                     </div>
                 </div>
 
@@ -401,7 +401,7 @@
                             <input type="file" id="authAvatarFileInput" accept="image/*" onchange="handleAvatarFileUpload(event)" class="hidden">
                             <button type="button" onclick="document.getElementById('authAvatarFileInput').click()" class="w-full py-1.5 px-3 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition shadow-sm flex items-center justify-center space-x-1.5">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <span>上載電腦/手機圖片</span>
+                                <span>上載電腦/手機圖片 (圖片大小<1.2MB)</span>
                             </button>
                             <div class="flex items-center space-x-2 text-[11px] text-slate-500">
                                 <button type="button" onclick="toggleAvatarUrlInput()" class="text-brand-600 hover:underline">使用圖片網址</button>
@@ -512,7 +512,15 @@
 
             <!-- Profile Summary Header -->
             <div class="flex items-center space-x-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <img id="profileCardAvatar" src="" class="w-16 h-16 rounded-full object-cover border-2 border-brand-500 shadow-md">
+                <!-- 可點擊更換頭像的容器 -->
+                <div class="relative group cursor-pointer" onclick="document.getElementById('profileAvatarFileInput').click()" title="點擊更換頭像">
+                    <img id="profileCardAvatar" src="" class="w-16 h-16 rounded-full object-cover border-2 border-brand-500 shadow-md group-hover:opacity-75 transition">
+                    <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-xs font-bold">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                </div>
+                <!-- 隱藏的圖片選擇器 -->
+                <input type="file" id="profileAvatarFileInput" accept="image/*" onchange="handleProfileAvatarUpload(event)" class="hidden">
                 <div>
                     <div class="flex items-center space-x-1 flex-wrap gap-1">
                         <h4 id="profileCardName" class="font-bold text-slate-800 text-base"></h4>
@@ -524,6 +532,7 @@
                 </div>
             </div>
 
+            
             <!-- User Activity Statistics -->
             <div class="grid grid-cols-3 gap-2 text-center">
                 <button type="button" onclick="filterMyPosts()" class="bg-slate-50 hover:bg-brand-50 hover:border-brand-300 p-3 rounded-xl border border-slate-200 transition group cursor-pointer" title="點擊搜尋我的帖文">
@@ -847,15 +856,25 @@
 
     <!-- MODAL: Q&A Modal -->
     <div id="qaModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <div class="flex items-center justify-between border-b pb-3">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl max-h-[85vh] flex flex-col">
+            <!-- 固定標頭 -->
+            <div class="flex items-center justify-between border-b pb-3 shrink-0">
                 <h3 class="text-lg font-bold text-slate-800">常見問題 (Q&A)</h3>
                 <button onclick="closeModal('qaModal')" class="text-slate-400 hover:text-slate-600 p-1">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
-            <div class="space-y-3 text-xs text-slate-700">
+            <!-- 可滾動的內容區域 -->
+            <div class="space-y-3 text-xs text-slate-700 flex-grow overflow-y-auto custom-scrollbar pr-1 pt-3">
+                <div class="border border-slate-200 rounded-xl p-3">
+                    <p class="font-bold text-slate-900 text-sm">Q: 使用Shall We Go服務時，有什麼需要注意？</p>
+                    <p class="text-slate-600 mt-1">A: 請各位在使用Shall We Go服務及討論區前，仔細閱讀有關條款及細則：<br><br>
+                        <a href="https://drive.google.com/file/d/1F4cu1hRekgkFPlVw9qJNg9Pk7OrooaZp/view?usp=drive_link" target="_blank" class="hover:text-brand-600 transition">用戶協議</a><br>
+                        <a href="https://drive.google.com/file/d/152-JHs2Te3jdJmd8J7ppjtlhAj--5_8I/view?usp=drive_link" target="_blank" class="hover:text-brand-600 transition">隱私權政策</a>
+                    </p>
+                </div>
+
                 <div class="border border-slate-200 rounded-xl p-3">
                     <p class="font-bold text-slate-900 text-sm">Q: 做完性格測試仍未完全了解自己，怎麼辦？</p>
                     <p class="text-slate-600 mt-1">A: 性格測試只是一個起點。Shall We Go 的導師會結合你的實際經歷與價值觀，透過敏捷生涯框架，帶領你在行動中探索真正的優勢與興趣。</p>
@@ -873,10 +892,9 @@
                 </div>
 
                 <div class="border border-slate-200 rounded-xl p-3">
-                    <p class="font-bold text-slate-900 text-sm">Q: 使用Shall We Go服務時，有什麼需要注意？</p>
-                    <p class="text-slate-600 mt-1">A: 請各位在使用Shall We Go服務及討論區前，仔細閱讀有關條款及細則：<br><br>
-                        <a href="https://drive.google.com/file/d/1F4cu1hRekgkFPlVw9qJNg9Pk7OrooaZp/view?usp=drive_link" target="_blank" class="hover:text-brand-600 transition">用戶協議</a><br>
-                        <a href="https://drive.google.com/file/d/152-JHs2Te3jdJmd8J7ppjtlhAj--5_8I/view?usp=drive_link" target="_blank" class="hover:text-brand-600 transition">隱私權政策</a>
+                    <p class="font-bold text-slate-900 text-sm">Q: 忘記帳號密碼可以怎麼辦？</p>
+                    <p class="text-slate-600 mt-1">A: 請點擊以下連結提交重設密碼申請。一般在24小時內你會收到重設密碼的電郵，請按照電郵內容指示進行重設密碼。如沒收到電郵，請檢查垃圾郵件箱。<br><br>
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLScffsKCG6VLkV7Sylx40bUOdEIDC0QWz_GGlCqc6MpiAAZWQQ/viewform?usp=publish-editor" target="_blank" class="hover:text-brand-600 transition">重設密碼申請表</a>
                     </p>
                 </div>
             </div>
@@ -1114,19 +1132,21 @@
                 try {
                     const userData = await window.firebaseLogin(identifier, password);
                     
-                    if (userData) {
-                        const isAdminAccount = userData.email?.toLowerCase() === 'shallwego.org@gmail.com';
-                        
-                        currentUser = {
-                            username: userData.username || (isAdminAccount ? 'Shall We Go 站長' : '會員'),
-                            email: userData.email,
-                            avatar: userData.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-                            role: isAdminAccount ? '站長/管理員' : (userData.role || '學生會員'),
-                            isAdmin: isAdminAccount,
-                            isRestricted: !!userData.isRestricted,
-                            isVip: isAdminAccount ? true : !!userData.isVip,
-                            isGuest: false
-                        };
+                    // 登入成功後確保 uid 正確存入 currentUser
+if (userData) {
+    const isAdminAccount = userData.email?.toLowerCase() === 'shallwego.org@gmail.com';
+    
+    currentUser = {
+        uid: userData.uid, // 🚨 關鍵修正：必須把 uid 存入全域變數
+        username: userData.username || (isAdminAccount ? 'Shall We Go 站長' : '會員'),
+        email: userData.email,
+        avatar: userData.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+        role: isAdminAccount ? '站長/管理員' : (userData.role || '學生會員'),
+        isAdmin: isAdminAccount,
+        isRestricted: !!userData.isRestricted,
+        isVip: isAdminAccount ? true : !!userData.isVip,
+        isGuest: false
+    };
 
                         localStorage.setItem('swg_user', JSON.stringify(currentUser));
                         renderUserArea();
@@ -1174,50 +1194,92 @@
         }
 
         // 修改後的註冊處理
-        async function handleAccountRegister(event) {
-            event.preventDefault();
-            const username = document.getElementById('regUsername').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPassword').value;
-            const passwordConfirm = document.getElementById('regPasswordConfirm').value;
-            const role = document.getElementById('regRole').value;
+ // 完全修正版的前端註冊邏輯
+async function handleAccountRegister(event) {
+    event.preventDefault();
+    
+    const username = document.getElementById('regUsername').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+    const role = document.getElementById('regRole').value;
 
-            if (password !== passwordConfirm) {
-                showToast('兩次輸入的密碼不一致！', 'error');
-                return;
-            }
+    // 0. 檢查暱稱是否重複
+    if (typeof window.checkUsernameExists === 'function') {
+        const isTaken = await window.checkUsernameExists(username);
+        if (isTaken) {
+            showToast('此暱稱已被其他用戶使用，請選擇其他暱稱！', 'error');
+            return;
+        }
+    }
 
-            const avatar = currentAvatarDataUrl || document.getElementById('authAvatarUrlInput')?.value.trim() || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80';
+    // 1. 密碼兩次比對
+    if (password !== passwordConfirm) {
+        showToast('兩次輸入的密碼不一致！', 'error');
+        return;
+    }
 
-            if (typeof window.firebaseRegister === 'function') {
-                try {
-                    const userData = await window.firebaseRegister(email, password, username, avatar, role);
-                    currentUser = { ...userData, isAdmin: false, isGuest: false };
-                    localStorage.setItem('swg_user', JSON.stringify(currentUser));
-                    renderUserArea();
-                    renderCategoryNav();
-                    renderPosts();
-                    closeModal('authModal');
-                    showToast(`帳號註冊成功並已同步至雲端！`, 'success');
-                    return;
-                } catch (err) {
-                    showToast(`註冊失敗: ${err.message}`, 'error');
-                    return;
-                }
-            }
+    // 2. Firebase 要求密碼至少 6 個字元
+    if (password.length < 6) {
+        showToast('密碼長度不足，請輸入至少 6 個字元！', 'error');
+        return;
+    }
 
-            const newUser = { username, email, password, avatar, role, isAdmin: false, isRestricted: false, isVip: false };
-            registeredUsers.push(newUser);
-            saveRegisteredUsers();
-            currentUser = { ...newUser, isGuest: false };
+    // 3. 處理頭像網址
+    const urlInput = document.getElementById('authAvatarUrlInput')?.value.trim();
+    const avatar = currentAvatarDataUrl || urlInput || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80';
+
+    // 4. 優先採用 Firebase 雲端註冊
+    if (typeof window.firebaseRegister === 'function') {
+        try {
+            // 呼叫 Firebase 註冊（內部若出錯會 throw 並自動登出 auth）
+            const userData = await window.firebaseRegister(email, password, username, avatar, role);
+            
+            // 只有在 Firebase 完全成功時，才更新本地狀態
+            currentUser = { ...userData, isGuest: false };
             localStorage.setItem('swg_user', JSON.stringify(currentUser));
-
+            
+            // 重置全域頭像快取與表單
+            currentAvatarDataUrl = '';
+            document.getElementById('registerForm').reset();
+            
             renderUserArea();
             renderCategoryNav();
             renderPosts();
             closeModal('authModal');
-            showToast(`帳號註冊成功（本地模式）！`, 'success');
+            showToast(`帳號註冊成功！歡迎加入 Shall We Go`, 'success');
+            return;
+        } catch (err) {
+            // 註冊失敗，完全中斷，絕不寫入 localStorage 或進入登入狀態
+            console.error("註冊失敗細節：", err);
+            showToast(`註冊失敗: ${err.message}`, 'error');
+            return; 
         }
+    }
+
+    // 5. 離線備份模式（僅在 Firebase 模組載入失敗時執行）
+    const existingUser = registeredUsers.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+    if (existingUser) {
+        showToast('該電郵已被註冊！', 'error');
+        return;
+    }
+
+    const newUser = { username, email, password, avatar, role, isAdmin: false, isRestricted: false, isVip: false };
+    registeredUsers.push(newUser);
+    saveRegisteredUsers();
+    
+    currentUser = { ...newUser, isGuest: false };
+    localStorage.setItem('swg_user', JSON.stringify(currentUser));
+
+    currentAvatarDataUrl = '';
+    document.getElementById('registerForm').reset();
+
+    renderUserArea();
+    renderCategoryNav();
+    renderPosts();
+    closeModal('authModal');
+    showToast(`帳號註冊成功（離線模式）！`, 'success');
+}
 
         // Demo Logins
         function loginAsDemo(type) {
@@ -1506,22 +1568,54 @@
             showToast(`已為您篩選「${currentUser.username}」發布的帖文`, 'success');
         }
 
-        function handleUpdateProfile(event) {
-            event.preventDefault();
-            if (!currentUser || currentUser.isGuest) return;
+        async function handleUpdateProfile(event) {
+    event.preventDefault();
+    if (!currentUser || currentUser.isGuest) return;
 
-            const newName = document.getElementById('editUsernameInput').value.trim();
-            const newRole = document.getElementById('editRoleSelect').value;
-            if (!newName) return;
+    const newName = document.getElementById('editUsernameInput').value.trim();
+    const newRole = document.getElementById('editRoleSelect').value;
+    if (!newName) return;
 
-            currentUser.username = newName;
-            currentUser.role = newRole;
-            localStorage.setItem('swg_user', JSON.stringify(currentUser));
-
-            renderUserArea();
-            closeModal('userProfileModal');
-            showToast('個人資料已更新！', 'success');
+    // 0. 檢查暱稱是否與其他人重複
+    if (typeof window.checkUsernameExists === 'function') {
+        const isTaken = await window.checkUsernameExists(newName, currentUser.uid);
+        if (isTaken) {
+            showToast('此暱稱已被其他用戶使用，請選擇其他暱稱！', 'error');
+            return;
         }
+    }
+
+    // 1. 更新本地狀態
+    currentUser.username = newName;
+    currentUser.role = newRole;
+    localStorage.setItem('swg_user', JSON.stringify(currentUser));
+
+    // 2. 🚨【雙重防護】：若無 uid，嘗試從已註冊清單 registeredUsers 補回 uid
+    let targetUid = currentUser.uid;
+    if (!targetUid && typeof registeredUsers !== 'undefined') {
+        const found = registeredUsers.find(u => u.email && u.email.toLowerCase() === currentUser.email.toLowerCase());
+        if (found && found.uid) {
+            targetUid = found.uid;
+            currentUser.uid = found.uid; // 補回 currentUser 的 uid
+            localStorage.setItem('swg_user', JSON.stringify(currentUser));
+        }
+    }
+    
+
+    // 3. 執行 Firestore 雲端寫入
+    if (targetUid && typeof window.updateUserProfileInFirestore === 'function') {
+        await window.updateUserProfileInFirestore(targetUid, {
+            username: newName,
+            role: newRole
+        });
+    } else {
+        console.warn("無法同步更新至 Firestore：找不到對應的 uid，請嘗試重新登入。");
+    }
+
+    renderUserArea();
+    closeModal('userProfileModal');
+    showToast('個人資料已成功更新並同步至雲端！', 'success');
+}
 
         function logoutUser() {
             localStorage.removeItem('swg_user');
@@ -2215,6 +2309,60 @@
             renderCategoryNav();
             renderPosts();
         });
+
+// 處理個人中心點擊頭像即時換圖與同步 Firestore
+async function handleProfileAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        showToast('請選擇有效的圖片檔案！', 'error');
+        return;
+    }
+
+    if (!currentUser || currentUser.isGuest) {
+        showToast('請先登入帳號！', 'error');
+        return;
+    }
+
+    showToast('正在優化與上載頭像...', 'info');
+
+    // 使用原有的圖片壓縮工具壓縮頭像，防止過大
+    compressAvatarImage(file, async (dataUrl) => {
+        // 1. 即時更新 UI 預覽
+        const avatarImg = document.getElementById('profileCardAvatar');
+        if (avatarImg) avatarImg.src = dataUrl;
+
+        // 2. 更新本地 currentUser 狀態
+        currentUser.avatar = dataUrl;
+        localStorage.setItem('swg_user', JSON.stringify(currentUser));
+
+        // 補回 uid (若缺失)
+        let targetUid = currentUser.uid;
+        if (!targetUid && typeof registeredUsers !== 'undefined') {
+            const found = registeredUsers.find(u => u.email && u.email.toLowerCase() === currentUser.email.toLowerCase());
+            if (found && found.uid) {
+                targetUid = found.uid;
+                currentUser.uid = found.uid;
+                localStorage.setItem('swg_user', JSON.stringify(currentUser));
+            }
+        }
+
+        // 3. 自動同步寫入至 Firebase Firestore
+        if (targetUid && typeof window.updateUserProfileInFirestore === 'function') {
+            await window.updateUserProfileInFirestore(targetUid, {
+                avatar: dataUrl
+            });
+            showToast('頭像已成功更換並同步至雲端！', 'success');
+        } else {
+            showToast('頭像已更換（離線模式）', 'info');
+        }
+
+        // 4. 重新繪製頁面頂部及側邊欄使用者頭像
+        renderUserArea();
+    });
+}
+
     </script>
 
 <!-- ===== FIREBASE SCRIPT INTEGRATION (ADMIN SYNC & RENDER FIX) ===== -->
@@ -2250,44 +2398,95 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // 登入功能
-    window.firebaseLogin = async function(email, password) {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+    // 檢查暱稱是否已被其他用戶佔用
+window.checkUsernameExists = async function(username, currentUid) {
+    try {
+        const querySnapshot = await getDocs(collection(db, 'users'));
+        let isTaken = false;
+        
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            // 轉為小寫比對，且排查是否為「非本人」的帳號
+            if (data.username && data.username.toLowerCase() === username.toLowerCase() && docSnap.id !== currentUid) {
+                isTaken = true;
+            }
+        });
+        
+        return isTaken;
+    } catch (err) {
+        console.error("檢查暱稱失敗：", err);
+        return false;
+    }
+};
 
-        let userData = {
+    // 登入功能
+    // 修正後的登入功能（優先讀取 Firestore 最新 Profile，防止舊資料覆蓋）
+window.firebaseLogin = async function(email, password) {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    const userDocRef = doc(db, 'users', user.uid);
+    let userData = null;
+
+    try {
+        // 1. 優先獲取 Firestore 內儲存的最新用戶資料
+        const userSnap = await getDoc(userDocRef);
+        
+        if (userSnap.exists()) {
+            userData = userSnap.data();
+            // 補齊 uid 屬性
+            userData.uid = user.uid;
+        }
+    } catch (err) {
+        console.warn("獲取 Firestore 用戶資料失敗，改用預設 Profile:", err);
+    }
+
+    // 2. 如果 Firestore 內還沒有此 User 文件，才建立預設資料
+    if (!userData) {
+        const isAdminAccount = email.toLowerCase() === 'shallwego.org@gmail.com';
+        userData = {
             uid: user.uid,
             username: user.displayName || email.split('@')[0],
             email: user.email,
             avatar: user.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-            role: user.email.toLowerCase() === 'shallwego.org@gmail.com' ? '站長/管理員' : '學生會員',
-            isAdmin: user.email.toLowerCase() === 'shallwego.org@gmail.com',
-            isVip: user.email.toLowerCase() === 'shallwego.org@gmail.com',
-            isRestricted: false
+            role: isAdminAccount ? '站長/管理員' : '學生會員',
+            isAdmin: isAdminAccount,
+            isVip: isAdminAccount,
+            isRestricted: false,
+            createdAt: Date.now()
         };
 
-        try {
-            const userDocRef = doc(db, 'users', user.uid);
-            await setDoc(userDocRef, userData, { merge: true });
-        } catch (err) {
-            console.error("Firestore 登入同步失敗:", err);
-        }
+        // 寫入預設資料
+        await setDoc(userDocRef, userData, { merge: true });
+    }
 
-        return userData;
-    };
+    return userData;
+};
 
     // 註冊功能
-    window.firebaseRegister = async function(email, password, username, avatar, role) {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+// 修正後的 Firebase 註冊功能（為 photoURL 進行長度截斷保護）
+window.firebaseRegister = async function(email, password, username, avatar, role) {
+    let userCredential;
+    try {
+        // 1. 在 Firebase Auth 建立帳號
+        userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        await updateProfile(user, { displayName: username, photoURL: avatar });
+        // 2. 🚨【關鍵修正】：Firebase Auth photoURL 限制最大 1024 字元
+        // 如果頭像網址是 Base64 (超過1000字元)，給 Auth 預設圖，完整 Base64 留在 Firestore 即可
+        const safeAuthAvatar = (avatar && avatar.length < 1000) 
+            ? avatar 
+            : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80';
 
+        // 更新 Auth Profile
+        await updateProfile(user, { displayName: username, photoURL: safeAuthAvatar });
+
+        // 3. 準備寫入 Firestore 的完整用戶資料（支援完整 Base64 頭像）
         const userData = {
             uid: user.uid,
             username: username,
             email: email,
-            avatar: avatar,
+            avatar: avatar || safeAuthAvatar, // Firestore 支援儲存完整 Base64 圖片
             role: role || '學生會員',
             isAdmin: email.toLowerCase() === 'shallwego.org@gmail.com',
             isVip: email.toLowerCase() === 'shallwego.org@gmail.com',
@@ -2295,14 +2494,35 @@
             createdAt: Date.now()
         };
 
+        // 4. 寫入 Firestore Database
         try {
             await setDoc(doc(db, 'users', user.uid), userData);
+            console.log("Firestore 寫入成功：", userData);
         } catch (dbErr) {
-            console.error("Firestore 註冊寫入失敗:", dbErr);
+            console.error("Firestore 寫入失敗細節：", dbErr);
+            if (user) {
+                try { await user.delete(); } catch(e) { await auth.signOut(); }
+            }
+            throw new Error(`資料庫寫入失敗 (${dbErr.message})，帳號已撤銷。`);
         }
 
         return userData;
-    };
+
+    } catch (err) {
+        let errorMsg = err.message;
+        if (err.code === 'auth/email-already-in-use') {
+            errorMsg = '該電郵地址已被註冊，請直接登入！';
+        } else if (err.code === 'auth/weak-password') {
+            errorMsg = '密碼強度不足，請輸入至少 6 個字元。';
+        } else if (err.code === 'auth/invalid-email') {
+            errorMsg = '電郵地址格式不正確。';
+        } else if (err.message && err.message.includes('Photo URL too long')) {
+            errorMsg = '頭像圖片檔案過大，請更換較小的圖片或使用圖片網址。';
+        }
+        
+        throw new Error(errorMsg);
+    }
+};
 
     // 站長切換 VIP / 禁言權限
     window.updateUserPermissionInFirestore = async function(uid, updateFields) {
@@ -2403,6 +2623,15 @@
     }
 
     startFirebase();
+    
+    window.updateUserProfileInFirestore = async function(uid, updateFields) {
+    try {
+        await setDoc(doc(db, 'users', uid), updateFields, { merge: true });
+        console.log("Firestore 用戶資料更新成功：", updateFields);
+    } catch (err) {
+        console.error("Firestore 用戶資料更新失敗：", err);
+    }
+};
 </script>
 
 <footer class="text-xs text-slate-500 text-center py-4 border-t border-slate-200 leading-relaxed bg-white mt-8">Copyright © 2025-2026 Shall We Go & Even Tse All Rights Reserved.     

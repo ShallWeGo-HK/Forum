@@ -201,7 +201,7 @@
                         <h4> Shall We Go 名言</h4>
                     </div>
                     <p class="text-xs text-slate-600 leading-relaxed">
-                        「人生來之不易，但放棄太過容易。與其獨自苦惱，不如由我們陪你尋找出路」<br><br>
+                        「人生來之不易，但放棄太過容易。與其經常原地踏步，不如由我們陪你走出新路」<br><br>
                         在這裡，我們不只討論，更陪你走。不論你的升學、職涯、終生大事決定如何，我們都會陪你一步步實現目標！
                     </p>
                     <div class="mt-4 pt-3 border-t border-teal-200/60 flex items-center justify-between text-xs text-brand-800 font-medium">
@@ -852,11 +852,6 @@
                         <a href="https://drive.google.com/file/d/1F4cu1hRekgkFPlVw9qJNg9Pk7OrooaZp/view?usp=drive_link" target="_blank" class="hover:text-brand-600 transition">用戶協議</a><br>
                         <a href="https://drive.google.com/file/d/152-JHs2Te3jdJmd8J7ppjtlhAj--5_8I/view?usp=drive_link" target="_blank" class="hover:text-brand-600 transition">隱私權政策</a>
                     </p>
-                </div>
-
-                <div class="border border-slate-200 rounded-xl p-3">
-                    <p class="font-bold text-slate-900 text-sm">Q: 做完性格測試仍未完全了解自己，怎麼辦？</p>
-                    <p class="text-slate-600 mt-1">A: 性格測試只是一個起點。Shall We Go 的導師會結合你的實際經歷與價值觀，透過敏捷生涯框架，帶領你在行動中探索真正的優勢與興趣。</p>
                 </div>
 
                 <div class="border border-slate-200 rounded-xl p-3">
@@ -1562,30 +1557,31 @@ async function handleAccountRegister(event) {
         }
 
         function renderCategoryNav() {
-            const categoryNav = document.getElementById('categoryNav');
-            if (!categoryNav) return;
-            const vipAccess = hasVipAccess();
+    const categoryNav = document.getElementById('categoryNav');
+    if (!categoryNav) return;
 
-            categoryNav.innerHTML = CATEGORIES.map(cat => {
-                const isActive = currentCategory === cat.id;
-                const availablePosts = posts.filter(p => {
-                    if (cat.id === 'all') return !VIP_CATEGORIES.includes(p.category);
-                    if (!vipAccess && VIP_CATEGORIES.includes(p.category)) return false;
-                    return p.category === cat.id;
-                });
+    categoryNav.innerHTML = CATEGORIES.map(cat => {
+        const isActive = currentCategory === cat.id;
+        
+        // 修正：開放計算所有公開與 VIP 分區的帖文總數，供所有用戶看見
+        const availablePosts = posts.filter(p => {
+            if (cat.id === 'all') return !VIP_CATEGORIES.includes(p.category);
+            return p.category === cat.id;
+        });
 
-                return `
-                    <button onclick="switchCategory('${cat.id}')" class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-xl transition ${isActive ? 'bg-brand-600 text-white font-bold shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">
-                        <div class="flex items-center space-x-2.5">
-                            <i class="${cat.icon} text-xs ${isActive ? 'text-white' : 'text-slate-400'}"></i>
-                            <span>${cat.name}</span>
-                            ${cat.vipOnly ? '<span class="text-[9px] bg-amber-500 text-white px-1.5 py-0.2 rounded font-bold shadow-xs">VIP</span>' : ''}
-                        </div>
-                        <span class="text-[11px] opacity-75">${availablePosts.length}</span>
-                    </button>
-                `;
-            }).join('');
-        }
+        return `
+            <button onclick="switchCategory('${cat.id}')" class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-xl transition ${isActive ? 'bg-brand-600 text-white font-bold shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">
+                <div class="flex items-center space-x-2.5">
+                    <i class="${cat.icon} text-xs ${isActive ? 'text-white' : 'text-slate-400'}"></i>
+                    <span>${cat.name}</span>
+                    ${cat.vipOnly ? '<span class="text-[9px] bg-amber-500 text-white px-1.5 py-0.2 rounded font-bold shadow-xs">VIP</span>' : ''}
+                </div>
+                <!-- 帖文數目：所有用戶皆可看見 -->
+                <span class="text-[11px] opacity-75">${availablePosts.length}</span>
+            </button>
+        `;
+    }).join('');
+}
 
         function switchCategory(catId) {
             currentCategory = catId;
@@ -1645,140 +1641,128 @@ async function handleAccountRegister(event) {
         }
 
         function renderPosts() {
-            const container = document.getElementById('postsContainer');
-            const postCountBadge = document.getElementById('postCountBadge');
-            const vipUser = hasVipAccess();
-            if (!container) return;
+    const container = document.getElementById('postsContainer');
+    const postCountBadge = document.getElementById('postCountBadge');
+    const vipUser = hasVipAccess();
+    if (!container) return;
 
-            // 如果非 VIP 用戶進入 VIP 專屬分區，顯示鎖定提示屏
-            if (!vipUser && VIP_CATEGORIES.includes(currentCategory)) {
-                postCountBadge.innerText = `共 0 則討論`;
-                container.innerHTML = `
-                    <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 text-center border border-amber-200 text-amber-900 space-y-4 shadow-sm">
-                        <div class="w-16 h-16 bg-amber-500 text-white rounded-full flex items-center justify-center text-2xl mx-auto shadow-md">
-                            <i class="fa-solid fa-lock"></i>
+    // 篩選帖子
+    let filtered = posts.filter(post => {
+        // 如果是在「全部討論」，依然隱藏 VIP 專區的帖文
+        if (currentCategory === 'all' && VIP_CATEGORIES.includes(post.category)) {
+            return false;
+        }
+
+        const matchesCat = (currentCategory === 'all' || post.category === currentCategory);
+        const q = searchQuery;
+        const matchesQuery = !q || 
+            (post.title && post.title.toLowerCase().includes(q)) ||
+            (post.content && post.content.toLowerCase().includes(q)) ||
+            (post.category && post.category.toLowerCase().includes(q)) ||
+            (post.author && post.author.toLowerCase().includes(q)) ||
+            (post.tags && post.tags.some(t => t.toLowerCase().includes(q)));
+
+        return matchesCat && matchesQuery;
+    });
+
+    // 排序邏輯
+    if (currentFilter === 'popular') {
+        filtered.sort((a, b) => (b.likes + (b.comments ? b.comments.length : 0)) - (a.likes + (a.comments ? a.comments.length : 0)));
+    } else if (currentFilter === 'unanswered') {
+        filtered = filtered.filter(p => !p.comments || p.comments.length === 0);
+    } else {
+        filtered.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    }
+
+    // 顯示帖文總數
+    postCountBadge.innerText = `共 ${filtered.length} 則討論`;
+
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div class="bg-white rounded-2xl p-8 text-center border border-slate-200 text-slate-400 space-y-3">
+                <i class="fa-solid fa-magnifying-glass-minus text-4xl text-slate-300"></i>
+                <p class="text-sm font-medium text-slate-600">${searchQuery ? `找不到與「${escapeHtml(searchQuery)}」相關的帖文` : '暫時未有相關主題帖文'}</p>
+                ${searchQuery ? `
+                    <button onclick="clearSearch()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
+                        清除搜尋條件
+                    </button>
+                ` : `
+                    <button onclick="checkAuthAndOpen('createPostModal')" class="px-4 py-2 bg-brand-600 text-white text-xs font-bold rounded-xl shadow">成為第一個發帖的人</button>
+                `}
+            </div>
+        `;
+        return;
+    }
+
+    const adminActive = isUserAdmin();
+
+    container.innerHTML = filtered.map(post => {
+        const isLikedByMe = post.likedBy && currentUser && post.likedBy.includes(currentUser.username);
+        const authorUser = registeredUsers.find(u => u.username === post.author);
+        const isAuthorVip = post.authorIsVip || (authorUser && authorUser.isVip);
+
+        // 判斷該帖子是否為 VIP 帖且當前用戶不是 VIP
+        const isVipPostLocked = VIP_CATEGORIES.includes(post.category) && !vipUser;
+
+        return `
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <img src="${post.authorAvatar || 'https://placehold.co/100x100'}" class="w-8 h-8 rounded-full object-cover">
+                    <div>
+                        <div class="flex items-center space-x-1.5 flex-wrap gap-1">
+                            <span class="font-bold text-slate-800 text-xs">${escapeHtml(post.author)}</span>
+                            ${isAuthorVip ? '<span class="text-[9px] bg-amber-500 text-white px-1.5 py-0.2 rounded font-bold shadow-xs"><i class="fa-solid fa-star text-[8px]"></i> VIP</span>' : ''}
                         </div>
-                        <div>
-                            <h3 class="text-base font-extrabold text-amber-900">「${escapeHtml(currentCategory)}」為 VIP 會員專屬分區</h3>
-                            <p class="text-xs text-amber-800 mt-1 max-w-md mx-auto leading-relaxed">
-                                此分區包含高級生涯諮詢紀錄與 1 對 1 導師問答。如欲開啟瀏覽與留言權限，請聯絡站長開通 VIP 會員資格！
-                            </p>
-                        </div>
-                        ${(!currentUser || currentUser.isGuest) ? `
-                            <button onclick="openModal('authModal')" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow transition inline-flex items-center space-x-1.5">
-                                <i class="fa-solid fa-right-to-bracket"></i>
-                                <span>立即登入帳號</span>
-                            </button>
-                        ` : `
-                            <div class="inline-block text-xs bg-white/80 border border-amber-300 px-4 py-2 rounded-xl text-amber-900 font-bold">
-                                💡 您可以聯絡站長 (shallwego.org@gmail.com) 申請 VIP 專屬權限
-                            </div>
-                        `}
-                    </div>
-                `;
-                return;
-            }
-
-            let filtered = posts.filter(post => {
-                if (currentCategory === 'all' && VIP_CATEGORIES.includes(post.category)) {
-                    return false;
-                }
-
-                if (!vipUser && VIP_CATEGORIES.includes(post.category)) {
-                    return false;
-                }
-
-                const matchesCat = (currentCategory === 'all' || post.category === currentCategory);
-                const q = searchQuery;
-                const matchesQuery = !q || 
-                    (post.title && post.title.toLowerCase().includes(q)) ||
-                    (post.content && post.content.toLowerCase().includes(q)) ||
-                    (post.category && post.category.toLowerCase().includes(q)) ||
-                    (post.author && post.author.toLowerCase().includes(q)) ||
-                    (post.tags && post.tags.some(t => t.toLowerCase().includes(q)));
-
-                return matchesCat && matchesQuery;
-            });
-
-            if (currentFilter === 'popular') {
-                filtered.sort((a, b) => (b.likes + (b.comments ? b.comments.length : 0)) - (a.likes + (a.comments ? a.comments.length : 0)));
-            } else if (currentFilter === 'unanswered') {
-                filtered = filtered.filter(p => !p.comments || p.comments.length === 0);
-            } else {
-                filtered.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            }
-
-            postCountBadge.innerText = `共 ${filtered.length} 則討論`;
-
-            if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div class="bg-white rounded-2xl p-8 text-center border border-slate-200 text-slate-400 space-y-3">
-                        <i class="fa-solid fa-magnifying-glass-minus text-4xl text-slate-300"></i>
-                        <p class="text-sm font-medium text-slate-600">${searchQuery ? `找不到與「${escapeHtml(searchQuery)}」相關的帖文` : '暫時未有相關主題帖文'}</p>
-                        ${searchQuery ? `
-                            <button onclick="clearSearch()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
-                                清除搜尋條件
-                            </button>
-                        ` : `
-                            <button onclick="checkAuthAndOpen('createPostModal')" class="px-4 py-2 bg-brand-600 text-white text-xs font-bold rounded-xl shadow">成為第一個發帖的人</button>
-                        `}
-                    </div>
-                `;
-                return;
-            }
-
-            const adminActive = isUserAdmin();
-
-            container.innerHTML = filtered.map(post => {
-                const isLikedByMe = post.likedBy && currentUser && post.likedBy.includes(currentUser.username);
-                const authorUser = registeredUsers.find(u => u.username === post.author);
-                const isAuthorVip = post.authorIsVip || (authorUser && authorUser.isVip);
-
-                return `
-                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition space-y-3">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2.5">
-                            <img src="${post.authorAvatar || 'https://placehold.co/100x100'}" class="w-8 h-8 rounded-full object-cover">
-                            <div>
-                                <div class="flex items-center space-x-1.5 flex-wrap gap-1">
-                                    <span class="font-bold text-slate-800 text-xs">${escapeHtml(post.author)}</span>
-                                    ${isAuthorVip ? '<span class="text-[9px] bg-amber-500 text-white px-1.5 py-0.2 rounded font-bold shadow-xs"><i class="fa-solid fa-star text-[8px]"></i> VIP</span>' : ''}
-                                </div>
-                                <span class="text-[11px] text-slate-400 block">${post.time || '剛剛'}</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="px-2.5 py-1 bg-brand-50 text-brand-700 rounded-full text-xs font-semibold">${escapeHtml(post.category)}</span>
-                            ${adminActive ? `
-                                <button onclick="requestDeletePost('${post.id}')" class="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1.5 rounded-lg text-xs transition" title="刪除帖文 (管理員權限)">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-
-                    <div class="cursor-pointer space-y-2" onclick="openPostDetail('${post.id}')">
-                        <h3 class="text-base font-bold text-slate-900 hover:text-brand-600 transition">${escapeHtml(post.title)}</h3>
-                        <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">${escapeHtml(post.content)}</p>
-                    </div>
-
-                    ${post.imageUrl ? `
-                        <div class="rounded-xl overflow-hidden max-h-56 cursor-pointer border border-slate-100" onclick="openPostDetail('${post.id}')">
-                            <img src="${post.imageUrl}" class="w-full h-full object-cover hover:scale-105 transition duration-300" alt="Post Attachment" onerror="this.parentElement.style.display='none'">
-                        </div>
-                    ` : ''}
-
-                    <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
-                        <button onclick="toggleLikePost('${post.id}')" class="flex items-center space-x-1">
-                            <i class="fa-${isLikedByMe ? 'solid' : 'regular'} fa-heart text-rose-500"></i>
-                            <span>${post.likes || 0}</span>
-                        </button>
-                        <button onclick="openPostDetail('${post.id}')" class="text-brand-600 hover:underline font-semibold">查看全文</button>
+                        <span class="text-[11px] text-slate-400 block">${getRelativeTime(post.timestamp || post.createdAt)}</span>
                     </div>
                 </div>
-                `;
-            }).join('');
-        }
+                <div class="flex items-center space-x-2">
+                    <span class="px-2.5 py-1 bg-brand-50 text-brand-700 rounded-full text-xs font-semibold">${escapeHtml(post.category)}</span>
+                    ${adminActive ? `
+                        <button onclick="requestDeletePost('${post.id}')" class="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1.5 rounded-lg text-xs transition" title="刪除帖文 (管理員權限)">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+
+            <div class="cursor-pointer space-y-2" onclick="openPostDetail('${post.id}')">
+                <h3 class="text-base font-bold text-slate-900 hover:text-brand-600 transition flex items-center space-x-1.5">
+                    ${isVipPostLocked ? '<i class="fa-solid fa-lock text-amber-500 text-sm"></i>' : ''}
+                    <span>${escapeHtml(post.title)}</span>
+                </h3>
+                
+                <!-- 內容部分：若為 VIP 鎖定狀態則模糊/隱藏內容 -->
+                ${isVipPostLocked ? `
+                    <div class="bg-amber-50/80 border border-amber-200 p-3 rounded-xl text-xs text-amber-800 flex items-center justify-between">
+                        <span class="font-semibold"><i class="fa-solid fa-lock mr-1"></i> 🔒 此為 VIP 專屬帖文，請開通 VIP 權限閱讀完整內容</span>
+                        <button onclick="openModal('authModal')" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-2.5 py-1 rounded-lg text-[10px] shadow transition shrink-0 ml-2">登入/申請</button>
+                    </div>
+                ` : `
+                    <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">${escapeHtml(post.content)}</p>
+                `}
+            </div>
+
+            ${(!isVipPostLocked && post.imageUrl) ? `
+                <div class="rounded-xl overflow-hidden max-h-56 cursor-pointer border border-slate-100" onclick="openPostDetail('${post.id}')">
+                    <img src="${post.imageUrl}" class="w-full h-full object-cover hover:scale-105 transition duration-300" alt="Post Attachment" onerror="this.parentElement.style.display='none'">
+                </div>
+            ` : ''}
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
+                <button onclick="toggleLikePost('${post.id}')" class="flex items-center space-x-1">
+                    <i class="fa-${isLikedByMe ? 'solid' : 'regular'} fa-heart text-rose-500"></i>
+                    <span>${post.likes || 0}</span>
+                </button>
+                <button onclick="openPostDetail('${post.id}')" class="text-brand-600 hover:underline font-semibold">
+                    ${isVipPostLocked ? '查看詳情 🔒' : '查看全文'}
+                </button>
+            </div>
+        </div>
+        `;
+    }).join('');
+}
 
         // Post CRUD & Actions
         function handleCreatePost(event) {
@@ -1806,23 +1790,25 @@ async function handleAccountRegister(event) {
             const tagsInput = document.getElementById('postTags').value.trim();
             const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(Boolean) : ['ShallWeGo'];
 
-            const newPost = {
-                id: 'post-' + Date.now(),
-                category,
-                title,
-                content,
-                author: currentUser.username,
-                authorAvatar: currentUser.avatar,
-                authorRole: currentUser.role,
-                authorIsVip: !!currentUser.isVip,
-                imageUrl: imageUrl || null,
-                tags,
-                likes: 0,
-                likedBy: [],
-                comments: [],
-                time: '剛剛',
-                timestamp: Date.now()
-            };
+            // 在 handleCreatePost 中修改 newPost 物件：
+const nowTime = Date.now();
+const newPost = {
+    id: 'post-' + nowTime,
+    category,
+    title,
+    content,
+    author: currentUser.username,
+    authorAvatar: currentUser.avatar,
+    authorRole: currentUser.role,
+    authorIsVip: !!currentUser.isVip,
+    imageUrl: imageUrl || null,
+    tags,
+    likes: 0,
+    likedBy: [],
+    comments: [],
+    timestamp: nowTime, // 確保紀錄精確時間戳
+    time: getRelativeTime(nowTime) // 初始化動態時間
+};
 
             posts.unshift(newPost);
             savePosts();
@@ -1866,53 +1852,82 @@ async function handleAccountRegister(event) {
             savePosts();
             renderPosts();
 
-            if (typeof window.updatePostInFirestore === 'function') {
-                window.updatePostInFirestore(post.id, { likes: post.likes, likedBy: post.likedBy });
-            }
-        }
+            // 🚨 關鍵修正：若目前正開啟此帖文的詳情彈窗，即時更新彈窗內的心心圖示與數字
+    if (activePostId === postId) {
+        updateDetailLikeUI(post);
+    }
+
+    if (typeof window.updatePostInFirestore === 'function') {
+        window.updatePostInFirestore(post.id, { likes: post.likes, likedBy: post.likedBy });
+    }
+}
+
+// 更新詳情頁彈窗內的心心按鈕狀態
+function updateDetailLikeUI(post) {
+    const likeBtn = document.getElementById('detailLikeBtn');
+    const likeCount = document.getElementById('detailLikeCount');
+    if (!likeBtn || !likeCount) return;
+
+    const isLikedByMe = post.likedBy && currentUser && post.likedBy.includes(currentUser.username);
+    
+    // 更新數字
+    likeCount.innerText = post.likes || 0;
+    
+    // 更新心心圖示：按讚顯示實心 fa-solid，未讚顯示空心 fa-regular
+    likeBtn.innerHTML = `
+        <i class="fa-${isLikedByMe ? 'solid text-rose-500' : 'regular text-slate-400'} fa-heart text-base"></i>
+        <span id="detailLikeCount" class="font-bold ${isLikedByMe ? 'text-rose-500' : 'text-slate-600'}">${post.likes || 0}</span>
+    `;
+}
 
         function toggleLikeCurrentPost() {
             if (activePostId) toggleLikePost(activePostId);
         }
 
         function openPostDetail(postId) {
-            const post = posts.find(p => p.id === postId);
-            if (!post) return;
-            activePostId = postId;
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+    activePostId = postId;
 
-            const vipUser = hasVipAccess();
-            if (!vipUser && VIP_CATEGORIES.includes(post.category)) {
-                showToast('此帖文屬於 VIP 專屬分區，請聯絡站長開通權限。', 'error');
-                return;
-            }
+    const vipUser = hasVipAccess();
+    if (!vipUser && VIP_CATEGORIES.includes(post.category)) {
+        showToast('此帖文屬於 VIP 專屬分區，請聯絡站長開通權限。', 'error');
+        return;
+    }
 
-            document.getElementById('detailCategory').innerText = post.category;
-            document.getElementById('detailAuthorAvatar').src = post.authorAvatar;
-            document.getElementById('detailAuthorName').innerText = post.author;
-            document.getElementById('detailAuthorBadge').innerText = post.authorRole || '同路人';
-            document.getElementById('detailTime').innerText = post.time || '未知時間';
-            document.getElementById('detailTitle').innerText = post.title;
-            document.getElementById('detailContent').innerText = post.content;
-            document.getElementById('detailLikeCount').innerText = post.likes || 0;
+    document.getElementById('detailCategory').innerText = post.category;
+    document.getElementById('detailAuthorAvatar').src = post.authorAvatar;
+    document.getElementById('detailAuthorName').innerText = post.author;
+    document.getElementById('detailAuthorBadge').innerText = post.authorRole || '同路人';
+    document.getElementById('detailTime').innerText = getRelativeTime(post.timestamp || post.createdAt);
+    document.getElementById('detailTitle').innerText = post.title;
+    document.getElementById('detailContent').innerText = post.content;
+    
+    const commentCountText = (post.comments ? post.comments.length : 0) + ' 則留言';
+    const detailCommentCount = document.getElementById('detailCommentCount');
+    if (detailCommentCount) detailCommentCount.innerText = commentCountText;
 
-            const authorUser = registeredUsers.find(u => u.username === post.author);
-            const isAuthorVip = post.authorIsVip || (authorUser && authorUser.isVip);
+    // 🚨 關鍵修正：打開彈窗時初始化心心按鈕狀態與數字
+    updateDetailLikeUI(post);
 
-            const vipBadge = document.getElementById('detailAuthorVipBadge');
-            if (vipBadge) {
-                if (isAuthorVip) vipBadge.classList.remove('hidden');
-                else vipBadge.classList.add('hidden');
-            }
+    const authorUser = registeredUsers.find(u => u.username === post.author);
+    const isAuthorVip = post.authorIsVip || (authorUser && authorUser.isVip);
 
-            const adminDeleteBtn = document.getElementById('adminDetailDeleteBtn');
-            if (adminDeleteBtn) {
-                if (isUserAdmin()) adminDeleteBtn.classList.remove('hidden');
-                else adminDeleteBtn.classList.add('hidden');
-            }
+    const vipBadge = document.getElementById('detailAuthorVipBadge');
+    if (vipBadge) {
+        if (isAuthorVip) vipBadge.classList.remove('hidden');
+        else vipBadge.classList.add('hidden');
+    }
 
-            renderComments(post.comments || []);
-            openModal('postDetailModal');
-        }
+    const adminDeleteBtn = document.getElementById('adminDetailDeleteBtn');
+    if (adminDeleteBtn) {
+        if (isUserAdmin()) adminDeleteBtn.classList.remove('hidden');
+        else adminDeleteBtn.classList.add('hidden');
+    }
+
+    renderComments(post.comments || []);
+    openModal('postDetailModal');
+}
 
         function renderComments(comments) {
             const list = document.getElementById('commentsList');
@@ -2310,6 +2325,33 @@ async function handleProfileAvatarUpload(event) {
         // 4. 重新繪製頁面頂部及側邊欄使用者頭像
         renderUserArea();
     });
+}
+
+// 計算相對時間（如：5分鐘前、2小時前、3天前、或具體日期）
+function getRelativeTime(timestamp) {
+    if (!timestamp) return '剛剛';
+    
+    const now = Date.now();
+    const elapsed = now - Number(timestamp);
+    
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+    const month = 30 * day;
+    const year = 365 * day;
+
+    if (elapsed < minute) {
+        return '剛剛';
+    } else if (elapsed < hour) {
+        return Math.floor(elapsed / minute) + ' 分鐘前';
+    } else if (elapsed < day) {
+        return Math.floor(elapsed / hour) + ' 小時前';
+    } else if (elapsed < month) {
+        return Math.floor(elapsed / day) + ' 天前';
+    } else {
+        const date = new Date(Number(timestamp));
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
 }
 
     </script>
